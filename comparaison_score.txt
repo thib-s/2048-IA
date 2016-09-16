@@ -1,0 +1,66 @@
+****************
+Fonction de direction: score
+Fonction de score: basic
+Fonction choix des tuiles: random
+Nombre de parties jouées: 200
+MIN = 64
+MAX = 512
+MOY = 217.5193597794944
+2048: 0.0%
+1024: 0.0%
+512: 15.0%
+****************
+Fonction de direction: score
+Fonction de score: monotony
+Fonction choix des tuiles: random
+Nombre de parties jouées: 200
+MIN = 64
+MAX = 512
+MOY = 256.0
+2048: 0.0%
+1024: 0.0%
+512: 18.5%
+****************
+Fonction de direction: score
+Fonction de score: corner_edge
+Fonction choix des tuiles: random
+Nombre de parties jouées: 200
+MIN = 64
+MAX = 1024
+MOY = 274.374006409291
+2048: 0.0%
+1024: 3.0%
+512: 30.0%
+****************
+Fonction de direction: score
+Fonction de score: second_best
+Fonction choix des tuiles: random
+Nombre de parties jouées: 200
+MIN = 64
+MAX = 1024
+MOY = 281.1117603294847
+2048: 0.0%
+1024: 2.0%
+512: 31.5%
+****************
+Fonction de direction: score
+Fonction de score: third_best
+Fonction choix des tuiles: random
+Nombre de parties jouées: 200
+MIN = 64
+MAX = 1024
+MOY = 236.38587154672504
+2048: 0.0%
+1024: 1.5%
+512: 25.0%
+****************
+Fonction de direction: score
+Fonction de score: ecart
+Fonction choix des tuiles: random
+Nombre de parties jouées: 200
+MIN = 64
+MAX = 2048
+MOY = 360.78611331635676
+2048: 2.5%
+1024: 18.0%
+512: 51.0%
