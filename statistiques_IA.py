@@ -27,6 +27,7 @@ def moyenne(tableau):
 #TESTS#####################################################################
 
 final = dict()
+strategy.set_random_seed(123456789)
 for dir_strat in DIR_STRAT:
     for scr_strat in SCR_STRAT:
         for til_strat in TIL_STRAT:
@@ -56,9 +57,9 @@ for dir_strat in DIR_STRAT:
             print("Fonction de score: " + scr_strat)
             print("Fonction choix des tuiles: " + til_strat)
             print("Nombre de parties jouées: " + str(len(resultat)))
-            print("MIN = " + str(2**min(resultat)))
-            print("MAX = " + str(2**max(resultat)))
-            print("MOY = " + str(2**moyenne(resultat)))
+            print("MIN = " + str(min(resultat)))
+            print("MAX = " + str(max(resultat)))
+            print("MOY = " + str(moyenne(resultat)))
             A = resultat.count(12)
             print("4096: " + str(A*100/N) + "%")
             A += resultat.count(11)

@@ -233,6 +233,9 @@ def third_ecart(board):
 #-----------CHOIX DES TUILES-----------#
 #--------------------------------------#
 
+def set_random_seed(newSeed):
+    random.seed(newSeed)
+
 # Original game's strategy to add new tile
 def random_tile(board):
     """choisit l'emplacement de la tuile suivant la regle originale de 2048"""
@@ -518,6 +521,8 @@ class PoolWorker:
     def f(self, direction):
         attempt = logic.copy_board(self.b)
         current_score = score_utility.slide_score(direction, attempt )
+        if direction == priority_choose_direction(self.b):
+            current_score == current_score * 1.3
         logic.slide(direction, attempt)
         return (current_score + expectimax_tile(attempt, self.l+1), direction)
 
