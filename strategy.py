@@ -30,7 +30,8 @@ SCORE_COEF = 1
 
 SCORE_FUNCTION = 'ecart'
 
-V = [1,10,600,40]
+V =  [47.16393343405, 37.059649768204814, 1005.8582246825005, 238.03858999798092, -20.466133240700227, 32.25984308182096]
+
 
 #--------------------------------------#
 #---------CHOIX DES STRATEGIES---------#
@@ -147,11 +148,11 @@ def minmax_choose_direction(board):
     global MINMAX_MAX_LEVEL
     score = score_basic(board)
     if score < 2:
-        MINMAX_MAX_LEVEL = 7
+        MINMAX_MAX_LEVEL = 8
     elif score < 5:
-        MINMAX_MAX_LEVEL = 5
+        MINMAX_MAX_LEVEL = 6
     elif score < 8:
-        MINMAX_MAX_LEVEL = 5
+        MINMAX_MAX_LEVEL = 4
     else:
         MINMAX_MAX_LEVEL = 4
     return call_minmax_direction(board)
@@ -207,26 +208,26 @@ def score_third_best(board):
     sc_third = score_utility.third_best(board)
     return sc_corner + 35*sc_third
     
-#def third_ecart(board):
-#    sc_mono = score_mono(board)
-#    bst_tile = score_utility.best_tile(board)
-#    best_tile_in_corner = score_utility.best_tile_in_corner(board, bst_tile)
-#    best_tile_on_edge = score_utility.best_tile_on_edge(board, bst_tile)
-#    if score_basic(board) == 0:
-#        return -20000000
-#    if score_basic(board) == (logic.SIZE**2 - 1):
-#        return 100000000
-#    sc_third = score_utility.third_best(board)
-#    ecart = score_utility.ecart(board)
-#    return V[0]*sc_mono + V[1]*bst_tile[2] + V[2] * best_tile_in_corner + V[3] * best_tile_on_edge + V[4]*sc_third - V[5] * ecart
-
 def third_ecart(board):
-    """Cette fonction tient compte de:
-    -les memes choses que third_best
-    -l'ecart en valeur absolue entre une case non nulle et ses voisines"""  
-    third = score_third_best(board)
+    sc_mono = score_mono(board)
+    bst_tile = score_utility.best_tile(board)
+    best_tile_in_corner = score_utility.best_tile_in_corner(board, bst_tile)
+    best_tile_on_edge = score_utility.best_tile_on_edge(board, bst_tile)
+    if score_basic(board) == 0:
+        return -20000000
+    if score_basic(board) == (logic.SIZE**2 - 1):
+        return 100000000
+    sc_third = score_utility.third_best(board)
     ecart = score_utility.ecart(board)
-    return third - 0.5 * ecart
+    return V[0]*sc_mono + V[1]*bst_tile[2] + V[2] * best_tile_in_corner + V[3] * best_tile_on_edge + V[4]*sc_third - V[5] * ecart
+
+#def third_ecart(board):
+#    """Cette fonction tient compte de:
+#    -les memes choses que third_best
+#    -l'ecart en valeur absolue entre une case non nulle et ses voisines"""  
+#    third = score_third_best(board)
+#    ecart = score_utility.ecart(board)
+#    return (third - 0.5 * ecart) *0.1
 
 
 #--------------------------------------#
@@ -460,7 +461,7 @@ def expectimax_direction(board, level, first_iter=False):
     """
     best_case = GAMEOVER
     if level == MINMAX_MAX_LEVEL:
-        return 0#score_board(board)
+        return 0.2*score_board(board)
     for direction in logic.possible_moves(board):
         attempt = logic.copy_board(board)
         current_score = score_utility.slide_score(direction, attempt )
@@ -502,10 +503,14 @@ def expectimax_direction_multi(board, level):
     """
     best_case = GAMEOVER
     if level == MINMAX_MAX_LEVEL:
-        return 0.3*score_board(board)
+        return score_board(board)
     pool = Pool(processes=8)
     pw = PoolWorker(board, level)
     for (this_score,direction) in pool.imap_unordered(pw.f, logic.possible_moves(board)):
+        if direction == logic.DOWN:
+            this_score = this_score * 0.1
+        if direction == logic.RIGHT:
+            this_score = this_score * 0.999
         if this_score >= best_case:
             best_case = this_score
             best_move = direction
@@ -521,8 +526,6 @@ class PoolWorker:
     def f(self, direction):
         attempt = logic.copy_board(self.b)
         current_score = score_utility.slide_score(direction, attempt )
-        if direction == priority_choose_direction(self.b):
-            current_score == current_score * 1.3
         logic.slide(direction, attempt)
         return (current_score + expectimax_tile(attempt, self.l+1), direction)
 
