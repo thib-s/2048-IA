@@ -508,9 +508,7 @@ def expectimax_direction_multi(board, level):
     pw = PoolWorker(board, level)
     for (this_score,direction) in pool.imap_unordered(pw.f, logic.possible_moves(board)):
         if direction == logic.DOWN:
-            this_score = this_score * 0.1
-        if direction == logic.RIGHT:
-            this_score = this_score * 0.999
+            this_score = this_score * 0.8
         if this_score >= best_case:
             best_case = this_score
             best_move = direction
