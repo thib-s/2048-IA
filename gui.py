@@ -3,7 +3,7 @@
 
 # imports ###################################################################
 
-import tkinter
+from tkinter import *
 from collections import defaultdict
 import time
 
@@ -53,6 +53,12 @@ window = tkinter.Tk()
 window.configure(bg=BACKGROUND_COLOR, border=7)
 window.wm_title("2048")
 window.resizable(0, 0)
+score = 0
+scorestr =  StringVar()
+scorestr.set("score:"+str(score))
+score_label = tkinter.Label(window, textvariable = scorestr)
+score_label.grid(row=logic.SIZE+1)
+
 
 def frame(i, j):
     frame = tkinter.Frame(window, width=107, height=107)
@@ -79,6 +85,7 @@ def update():
                                    text=str(v) if v else "",
                                    font=get_font(v))
             frames[i][j].configure(bg=bg)
+            scorestr.set("score:"+str(score))
 
 # handling events
 
@@ -138,10 +145,13 @@ def next_state(key):
         raise AssertionError('Invalid state ' + state)
 
 def play_direction(key):
-    direction = strategy.choose_direction(key, board)
+    global score
+    direction = strategy.choose_direction(key, board, score)
     if direction is None:
         return False
-    if not logic.slide(direction, board):
+    (moved, score_increment) = logic.slide(direction, board)
+    score += score_increment
+    if not moved:
         return False
     return True
 

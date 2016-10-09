@@ -102,17 +102,19 @@ def compress(values):
             j += 1
     line.append(-1)
     result = zeros(SIZE)
+    score_increment = 0
     i = 0#curseur qui lit les valeurs de line par groupe de 2
     k = 0#curseur qui indique ou on place les valeurs sur la ligne finale
     while i < j:
         if line[i] == line[i+1]:
             result[k] = line[i]+1
+            score_increment += 2*(line[i]+1)
             i += 2
         else:
             result[k] = line[i]
             i += 1
         k += 1
-    return result
+    return (result,score_increment)
 
 def slide(direction, board, dry_run=False):
     """slide the board according to direction, return whether the board has changed.
@@ -121,25 +123,33 @@ def slide(direction, board, dry_run=False):
     whether the board would be changed.
     """
     cp_board = copy_board(board)
+    score = 0
     if direction == LEFT:
         for i in range(SIZE):
-            board[i] = compress(board[i])
+            (board[i],line_score) = compress(board[i])
+            score += line_score
     elif direction == DOWN:
         for i in range(SIZE):
-            set_colonne(board, inverse(compress(inverse(get_colonne(board, i)))), i)
+            (partial_slide, line_score) = compress(inverse(get_colonne(board, i)))
+            set_colonne(board, inverse(partial_slide), i)
+            score += line_score
     elif direction == RIGHT:
         for i in range(SIZE):
-            board[i] = inverse(compress(inverse(board[i])))
+            (partial_slide, line_score) = compress(inverse(board[i]))
+            board[i] = inverse(partial_slide)
+            score += line_score
     elif direction == UP:
         for i in range(SIZE):
-            set_colonne(board, compress(get_colonne(board, i)), i)
+            (partial_slide, line_score) = compress(get_colonne(board, i))
+            set_colonne(board, partial_slide, i)
+            score += line_score
     if cp_board == board:
-        return False
+        return (False, score)
     else:
         if dry_run == True:
             for i in range(SIZE):#on copie le tableau ligne par ligne
                 board[i] = cp_board[i]#cela evite les erreurs de pointeurs
-        return True
+        return (True, score)
 
 #--------------------------------------#
 #---------DIRECTIONS POSSIBLES---------#
@@ -147,7 +157,8 @@ def slide(direction, board, dry_run=False):
 
 def move_is_possible(direction, board):
     """verifie si le movement indiqué est possible"""
-    return slide(direction, board, True)
+    (res, _) = slide(direction, board, True)
+    return res
 
 def possible_moves(board):
     """renvoie une liste des directions possibles"""

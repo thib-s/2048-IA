@@ -3,10 +3,8 @@ implementation des strategies de jeu pour placer les tuiles et jouer
 """
 # imports ###################################################################
 
-from multiprocessing import Pool
 import logic
 import random
-import score_utility
 
 # configuration ############################################################
 
@@ -31,7 +29,7 @@ def new_tile_requires_keyboard():
     """indique si la strategie de placement de tuiles necessite le clavier"""
     return NEW_TILE_STRATEGY.startswith('keyboard')
 
-def choose_direction(key, board):
+def choose_direction(key, board, score):
     """selectionne la strategie a utiliser pour choisir la direction"""
     if DIRECTION_STRATEGY == 'keyboard':
         return keyboard_choose_direction(key)
