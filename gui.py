@@ -94,12 +94,13 @@ resume_state = ''
 board = logic.empty_board()
 
 def key_press(event):
-    global state, resume_state
+    global state, resume_state, score
     if event.keysym == 'q':
         window.destroy()
         return
     if event.keysym == 'r':
         if state == 'gameover':
+            score = 0
             state = 'new_tile'
             for i in range(len(board)):
                 board[i] = logic.zeros(logic.SIZE)
