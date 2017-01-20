@@ -3,7 +3,7 @@
 
 # imports ###################################################################
 
-from tkinter import *
+import tkinter
 from collections import defaultdict
 import time
 
@@ -54,7 +54,7 @@ window.configure(bg=BACKGROUND_COLOR, border=7)
 window.wm_title("2048")
 window.resizable(0, 0)
 score = 0
-scorestr =  StringVar()
+scorestr =  tkinter.StringVar()
 scorestr.set("score:"+str(score))
 score_label = tkinter.Label(window, textvariable = scorestr)
 score_label.grid(row=logic.SIZE+1)
