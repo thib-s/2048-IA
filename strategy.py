@@ -16,11 +16,15 @@ DIRECTION_STRATEGY = 'expectimax'
 
 GAMEOVER = -float('inf')
 
-MINMAX_MAX_LEVEL = 2
+MINMAX_MAX_LEVEL = 4
 
 ADAPTED_LEVEL = MINMAX_MAX_LEVEL
 
-ALPHA = 0.1
+ADAPTER = True
+
+ALPHA = 0.15
+
+BETA = 1000
 
 #--------------------------------------#
 #---------CHOIX DES STRATEGIES---------#
@@ -42,7 +46,8 @@ def choose_direction(key, board, score):
     if DIRECTION_STRATEGY == 'keyboard':
         return keyboard_choose_direction(key)
     if DIRECTION_STRATEGY == 'expectimax':
-        #adapt_level(board)
+        if ADAPTER:
+            adapt_level(board)
         return expectimax_direction(board,0,0,True)
     else:
         raise ValueError('No such strategy', DIRECTION_STRATEGY)
@@ -55,13 +60,13 @@ def adapt_level(board):
     global MINMAX_MAX_LEVEL, ADAPTED_LEVEL
     score = scoring.empty_tiles(board)
     if score < 2:
-        ADAPTED_LEVEL = 6
+        ADAPTED_LEVEL = 8
     elif score < 5:
-        ADAPTED_LEVEL = 5
+        ADAPTED_LEVEL = 6
     elif score < 8:
         ADAPTED_LEVEL = 4
     else:
-        ADAPTED_LEVEL = 3
+        ADAPTED_LEVEL = 4
 
 #--------------------------------------#
 #-----------CHOIX DES TUILES-----------#
@@ -101,8 +106,8 @@ def keyboard_choose_direction(key):
     return direction
 
 def compute_score(board, score):
-    global ALPHA
-    return ALPHA*scoring.empty_tiles(board)* (1-ALPHA)*score
+    global ALPHA, BETA
+    return ALPHA*scoring.empty_tiles(board) + (1-ALPHA)*score + BETA*scoring.best_tile_corner(board)
 
 #EXPECTIMAX###################################################################
 
@@ -118,6 +123,8 @@ def expectimax_direction(board, level, score = 0, first_iter=False):
         (_, score_increment) = logic.slide(direction, attempt)
         next_score = score + score_increment
         this_score = expectimax_tile(attempt, level+1, next_score)
+        if (direction == logic.UP):
+            this_score = 0.9*this_score
         if this_score >= best_case:
             best_case = this_score
             best_move = direction

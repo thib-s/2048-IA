@@ -26,5 +26,12 @@ def best_tile(board):
                 best_tile = (x,y,board[x][y])
     return best_tile
 
+def best_tile_corner(board):
+    (x,y,val) = best_tile(board)
+    if (((x == 0) or (x== logic.SIZE)) and ((y == 0) or (y == logic.SIZE))):
+        return True
+    else:
+        return False
+
 def normalize_official_score_gain(actual_score):
     return log(actual_score,2) #needs to be improved

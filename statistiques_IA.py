@@ -27,9 +27,9 @@ def scoring(board):
     return result
 
 #TESTS#####################################################################
-
-for alpha in range(10):
-    strategy.ALPHA = alpha/10
+strategy.ADAPTER = False
+for beta in range(10):
+    strategy.BETA = beta
     resultat = []
     n = 0
     while (n < N):
@@ -51,7 +51,7 @@ for alpha in range(10):
         n += 1
         resultat.append(score)
     print("****************")
-    print("alpha: " + str(strategy.ALPHA))
+    print("beta: " + str(strategy.BETA))
     print("average score = " + str(moyenne(resultat)))
 
             
