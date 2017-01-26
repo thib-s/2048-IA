@@ -20,6 +20,8 @@ BRAIN_INIT = False
 
 NET = RecurrentNetwork()
 
+WEIGHTS = np.asarray(np.fromfile("opti_results/best_2017-01-26 14:26:04.276508.npy"))
+
 #--------------------------------------#
 #---------CHOIX DES STRATEGIES---------#
 #--------------------------------------#
@@ -39,7 +41,7 @@ def choose_direction(key, board):
     """selectionne la strategie a utiliser pour choisir la direction"""
     if DIRECTION_STRATEGY == 'keyboard':
         return keyboard_choose_direction(key)
-    elif DIRECTION_STRATEGY == "brain":
+    elif DIRECTION_STRATEGY == 'brain':
         return brain_choose_direction(board)
     else:
         raise ValueError('No such strategy', DIRECTION_STRATEGY)
@@ -75,6 +77,7 @@ def brain_choose_direction(board):
 
 def brain_init():
     global NET
+    NET = RecurrentNetwork('forget')
     NET.addInputModule(LinearLayer(logic.SIZE**2, name='in'))
     NET.addModule(SigmoidLayer(logic.SIZE**2, name='hidden'))
     NET.addOutputModule(LinearLayer(4, name='out'))
@@ -82,12 +85,13 @@ def brain_init():
     NET.addConnection(FullConnection(NET['hidden'], NET['out'], name='c2'))
     NET.addRecurrentConnection(FullConnection(NET['hidden'], NET['hidden'], name='c3'))
     NET.sortModules()
-    NET.randomize()
-    #set_brain_weights()
+    #NET.randomize()
+    NET._setParameters(WEIGHTS)
 
 def set_brain_weights(weights):
-    global NET
-    NET.params = weights
+    global WEIGHTS
+    WEIGHTS = np.asarray(weights)
+
 
 def get_brain_weights():
     return NET.params
@@ -95,17 +99,23 @@ def get_brain_weights():
 def brain_decision(board):
     global NET
     cp_board = prepare_board(board)
+    assert (NET.params.all() == WEIGHTS.all())
     result = NET.activate(cp_board)
     max_val = -float('inf')
     max_index = 0
     for i in range(len(result)):
-        if result[i]>=max_val and logic.move_is_possible(logic.DIRECTIONS[i],board):
+        if result[i]>=max_val and logic.move_is_possible(logic.DIRECTIONS[i], board):
             max_index = i
             max_val = result[i]
     return logic.DIRECTIONS[max_index]
 
 def prepare_board(board):
-    return np.asarray(board).reshape(-1)
+    prep = np.asarray(board).reshape(-1)
+    top = max(prep)
+    if top != 0:
+        for i in range(len(prep)):
+            prep[i] = prep[i]/top
+    return prep
 
 
 #--------------------------------------#
