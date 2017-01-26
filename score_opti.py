@@ -57,7 +57,7 @@ strategy.SCORE_FUNCTION = scr_strat
 def play_game(genome):
     result = []
     n = 0
-    vect = genome.genomeList#map(lambda x: x / PRECISION, genome.genomeList)
+    vect = genome#genome.genomeList#map(lambda x: x / PRECISION, genome.genomeList)
     strategy.BRAIN_INIT = False
     strategy.set_brain_weights(vect)
     while (n < N):
@@ -83,7 +83,7 @@ def play_game(genome):
 
 
 #x0 = np.array([1,10,600,40,35,0.5])
-#res = minimize(play_game, x0, method='nelder-mead',options={'xtol': 1e-3, 'disp': True})
+res = minimize(play_game, strategy.WEIGHTS, method='nelder-mead',options={'xtol': 1e-3, 'disp': True})
 #print(res.x)
 
 
@@ -100,22 +100,22 @@ def play_game(genome):
 #name = OUT_FOLDER+"avg_"+dt
 #np.save(name,np.asarray(res[5]))
 
-genome = G1DList.G1DList(len(strategy.WEIGHTS))
-genome.setParams(rangemin=0.0, rangemax=1.0)
-
+#strategy.brain_init()
+#genome = G1DList.G1DList(len(strategy.NET.params))
+#genome.setParams(rangemin=0.0, rangemax=1.0)
 # Change the initializator to Real values
-genome.initializator.set(Initializators.G1DListInitializatorReal)
-
+#genome.initializator.set(Initializators.G1DListInitializatorReal)
 # Change the mutator to Gaussian Mutator
-genome.mutator.set(Mutators.G1DListMutatorRealGaussian)
-
-genome.evaluator.set(play_game)
-
-ga = GSimpleGA.GSimpleGA(genome)
-ga.setMultiProcessing(False)
-ga.evolve(freq_stats=2)
+#genome.mutator.set(Mutators.G1DListMutatorRealGaussian)
+#genome.evaluator.set(play_game)
+#ga = GSimpleGA.GSimpleGA(genome)
+#ga.setMultiProcessing(False)
+#ga.setGenerations(100)
+#ga.setMutationRate(0.05)
+#ga.setPopulationSize(200)
+#ga.evolve(freq_stats=1)
 dt = str(datetime.datetime.now())
 name = OUT_FOLDER+"best_"+dt
-res = np.asarray(ga.bestIndividual().genomeList)#map(lambda x: x / PRECISION,np.asarray(ga.bestIndividual().genomeList))
+#res = np.asarray(ga.bestIndividual().genomeList)#map(lambda x: x / PRECISION,np.asarray(ga.bestIndividual().genomeList))
 print res
-np.save(name,res)
+np.save(name, res)
