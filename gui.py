@@ -3,7 +3,7 @@
 
 # imports ###################################################################
 
-import tkinter
+import Tkinter as tkinter
 from collections import defaultdict
 import time
 
