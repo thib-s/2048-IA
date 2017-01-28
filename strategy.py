@@ -20,7 +20,7 @@ BRAIN_INIT = False
 
 NET = RecurrentNetwork()
 
-WEIGHTS = np.asarray(np.fromfile("opti_results/best_2017-01-26 14:26:04.276508.npy"))
+WEIGHTS = np.asarray(np.fromfile("best.npy"))
 
 #--------------------------------------#
 #---------CHOIX DES STRATEGIES---------#
