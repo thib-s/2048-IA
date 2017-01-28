@@ -11,13 +11,12 @@ import datetime
 import cma
 import time
 
+from pybrain.optimization import NelderMead, CMAES
+
 import logic
 import strategy
-#import score_utility
-from scipy.optimize import minimize
 import numpy as np
-from pyevolve import G1DList, Initializators, Mutators
-from pyevolve import GSimpleGA
+
 
 
 
@@ -27,12 +26,15 @@ from pyevolve import GSimpleGA
 dir_strat = 'brain'
 scr_strat = 'ecart'
 til_strat = 'random'
-N = 1
+N = 5
 NB_COUPS_MAX = 1000
 MAX_ITER = 100
 OUT_FOLDER = "opti_results/"
-#PRECISION = 1000 #1/100000 precision
 
+
+strategy.DIRECTION_STRATEGY = dir_strat
+strategy.NEW_TILE_STRATEGY = til_strat
+strategy.SCORE_FUNCTION = scr_strat
 
 
 #FONCTIONS#################################################################
@@ -45,14 +47,7 @@ def scoring(board):
     for x in range(logic.SIZE):
         for y in range(logic.SIZE):
             result = result + (board[x][y]-1)*(2**board[x][y])
-    return result
-
-#TESTS#####################################################################
-
-strategy.DIRECTION_STRATEGY = dir_strat
-strategy.NEW_TILE_STRATEGY = til_strat
-strategy.SCORE_FUNCTION = scr_strat
-
+    return np.log(result)
 
 def play_game(genome):
     result = []
@@ -63,7 +58,7 @@ def play_game(genome):
     while (n < N):
         strategy.BRAIN_INIT = False
         strategy.set_brain_weights(vect)
-        strategy.set_random_seed(n)
+        #strategy.set_random_seed(n)
         board = logic.empty_board()
         state = 'new_tile'
         nb_coup = 0
@@ -82,23 +77,37 @@ def play_game(genome):
     return moyenne(result)
 
 
+#SCIPY_MINIMIZE################################################################
+
 #x0 = np.array([1,10,600,40,35,0.5])
-res = minimize(play_game, strategy.WEIGHTS, method='nelder-mead',options={'xtol': 1e-3, 'disp': True})
+#res = minimize(play_game, strategy.WEIGHTS, bounds=(0, 1), method='nelder-mead', options={'xtol': 1e-3, 'disp': True})
 #print(res.x)
 
 
-#res = cma.fmin(play_game, strategy.WEIGHTS, 0.25,{'maxiter':MAX_ITER})
-#print(res.x)
-#print("best:"+ str(res[0]))  # best evaluated solution
-#print("mean:"+str(res[5]))  # mean solution, presumably better with noise
-#fig = cma.plot()
-#dt = str(datetime.datetime.now())
-#name = OUT_FOLDER+"opti_"+dt+".png"
-#cma.savefig(name)
-#name = OUT_FOLDER+"best_"+dt
-#np.save(name,np.asarray(res[0]))
-#name = OUT_FOLDER+"avg_"+dt
-#np.save(name,np.asarray(res[5]))
+#PYBRAIN_CMA####################################################################
+
+#l = CMAES(play_game, strategy.WEIGHTS)
+#l.maxEvaluations = 10000
+#res = l.learn()
+
+
+#CMA############################################################################
+
+res = cma.fmin(play_game, strategy.WEIGHTS, 0.25,{'maxiter':MAX_ITER},restart_from_best=True)
+print("best:"+ str(res[0]))  # best evaluated solution
+print("mean:"+str(res[5]))  # mean solution, presumably better with noise
+fig = cma.plot()
+dt = str(datetime.datetime.now())
+name = OUT_FOLDER+"opti_"+dt+".png"
+cma.savefig(name)
+name = OUT_FOLDER+"best_"+dt
+np.save(name,np.asarray(res[0]))
+np.save("best", res[0])
+name = OUT_FOLDER+"avg_"+dt
+np.save(name,np.asarray(res[5]))
+
+
+#PYEVOLVE########################################################################
 
 #strategy.brain_init()
 #genome = G1DList.G1DList(len(strategy.NET.params))
@@ -114,8 +123,13 @@ res = minimize(play_game, strategy.WEIGHTS, method='nelder-mead',options={'xtol'
 #ga.setMutationRate(0.05)
 #ga.setPopulationSize(200)
 #ga.evolve(freq_stats=1)
-dt = str(datetime.datetime.now())
-name = OUT_FOLDER+"best_"+dt
+
+
+#RESULTS#########################################################################
+
+#dt = str(datetime.datetime.now())
+#name = OUT_FOLDER+"best_"+dt
 #res = np.asarray(ga.bestIndividual().genomeList)#map(lambda x: x / PRECISION,np.asarray(ga.bestIndividual().genomeList))
-print res
-np.save(name, res)
+#print res
+#np.save(name, res[0])
+#np.save("best", res[0])
