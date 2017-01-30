@@ -76,6 +76,10 @@ def brain_choose_direction(board):
     return brain_decision(board)
 
 def brain_init():
+    setup_brain()
+    brain_parametrize()
+
+def setup_brain():
     global NET
     NET = RecurrentNetwork('forget')
     NET.addInputModule(LinearLayer(logic.SIZE**2, name='in'))
@@ -85,13 +89,21 @@ def brain_init():
     NET.addConnection(FullConnection(NET['hidden'], NET['out'], name='c2'))
     NET.addRecurrentConnection(FullConnection(NET['hidden'], NET['hidden'], name='c3'))
     NET.sortModules()
-    #NET.randomize()
+
+def brain_parametrize():
+    global NET
     NET._setParameters(WEIGHTS)
+
+def init_new_brain():
+    global NET, WEIGHTS
+    setup_brain()
+    NET.randomize()
+    WEIGHTS = NET.params
+    np.save("best", WEIGHTS)
 
 def set_brain_weights(weights):
     global WEIGHTS
     WEIGHTS = np.asarray(weights)
-
 
 def get_brain_weights():
     return NET.params
