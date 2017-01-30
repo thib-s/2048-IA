@@ -7,11 +7,12 @@ Created on Mon Mar 30 15:57:16 2015
 
 #imports###################################################################
 import datetime
+from scipy.optimize import minimize
 
 import cma
-import time
 
-from pybrain.optimization import NelderMead, CMAES
+from pybrain.optimization import CMAES
+from pyevolve import G1DList, Mutators, Initializators, GSimpleGA, Consts
 
 import logic
 import strategy
@@ -23,6 +24,8 @@ import numpy as np
 
 #CONFIGURATION#############################################################
 
+OPTIMIZER = "pyevolve"
+SAVE_RESULTS = False
 dir_strat = 'brain'
 scr_strat = 'ecart'
 til_strat = 'random'
@@ -30,12 +33,6 @@ N = 5
 NB_COUPS_MAX = 1000
 MAX_ITER = 100
 OUT_FOLDER = "opti_results/"
-
-
-strategy.DIRECTION_STRATEGY = dir_strat
-strategy.NEW_TILE_STRATEGY = til_strat
-strategy.SCORE_FUNCTION = scr_strat
-
 
 #FONCTIONS#################################################################
 
@@ -52,7 +49,10 @@ def scoring(board):
 def play_game(genome):
     result = []
     n = 0
-    vect = genome#genome.genomeList#map(lambda x: x / PRECISION, genome.genomeList)
+    if OPTIMIZER == "pyevolve":
+        vect = genome.genomeList
+    else:
+        vect = genome#map(lambda x: x / PRECISION, genome.genomeList)
     strategy.BRAIN_INIT = False
     strategy.set_brain_weights(vect)
     while (n < N):
@@ -74,55 +74,82 @@ def play_game(genome):
                 state = 'gameover'
         n += 1
         result.append(scoring(board))
-    return moyenne(result)
+    return 1/moyenne(result)
 
 
 #SCIPY_MINIMIZE################################################################
 
-#x0 = np.array([1,10,600,40,35,0.5])
-#res = minimize(play_game, strategy.WEIGHTS, bounds=(0, 1), method='nelder-mead', options={'xtol': 1e-3, 'disp': True})
-#print(res.x)
+def scipy_minimize():
+    #bnd = np.array([0, 1])
+    #for i in range(len(strategy.WEIGHTS)-1):
+    #    np.append(bnd, [0, 1])#bounds=bnd
+    res = minimize(play_game, strategy.WEIGHTS, options={'disp': True})
+    print(res)
+    if SAVE_RESULTS:
+        dt = str(datetime.datetime.now())
+        name = OUT_FOLDER + "best_" + dt
+        np.save(name, res.x)
+        np.save("best", res.x)
 
 
 #PYBRAIN_CMA####################################################################
-
-#l = CMAES(play_game, strategy.WEIGHTS)
-#l.maxEvaluations = 10000
-#res = l.learn()
+def pybrain_cma(maxEval = 100):
+    l = CMAES(play_game, strategy.WEIGHTS)
+    l.minimize = True
+    l.maxEvaluations = maxEval
+    res = l.learn()
+    print res
+    if SAVE_RESULTS:
+        dt = str(datetime.datetime.now())
+        name = OUT_FOLDER + "pybraincma_" + dt
+        np.save(name, res[0])
+        np.save("best", res[0])
 
 
 #CMA############################################################################
 
-res = cma.fmin(play_game, strategy.WEIGHTS, 0.25,{'maxiter':MAX_ITER},restart_from_best=True)
-print("best:"+ str(res[0]))  # best evaluated solution
-print("mean:"+str(res[5]))  # mean solution, presumably better with noise
-fig = cma.plot()
-dt = str(datetime.datetime.now())
-name = OUT_FOLDER+"opti_"+dt+".png"
-cma.savefig(name)
-name = OUT_FOLDER+"best_"+dt
-np.save(name,np.asarray(res[0]))
-np.save("best", res[0])
-name = OUT_FOLDER+"avg_"+dt
-np.save(name,np.asarray(res[5]))
+def cma_lib():
+    res = cma.fmin(play_game, strategy.WEIGHTS, 0.25, {'maxiter': MAX_ITER}, restart_from_best=True)
+    print("best:" + str(res[0]))  # best evaluated solution
+    print("mean:" + str(res[5]))  # mean solution, presumably better with noise
+    if SAVE_RESULTS:
+        fig = cma.plot()
+        dt = str(datetime.datetime.now())
+        name = OUT_FOLDER + "cma_info_" + dt + ".png"
+        cma.savefig(name)
+        name = OUT_FOLDER + "cma_best_" + dt
+        np.save(name, np.asarray(res[0]))
+        np.save("best", res[0])
+        name = OUT_FOLDER + "cma_avg_" + dt
+        np.save(name, np.asarray(res[5]))
 
 
 #PYEVOLVE########################################################################
 
-#strategy.brain_init()
-#genome = G1DList.G1DList(len(strategy.NET.params))
-#genome.setParams(rangemin=0.0, rangemax=1.0)
-# Change the initializator to Real values
-#genome.initializator.set(Initializators.G1DListInitializatorReal)
-# Change the mutator to Gaussian Mutator
-#genome.mutator.set(Mutators.G1DListMutatorRealGaussian)
-#genome.evaluator.set(play_game)
-#ga = GSimpleGA.GSimpleGA(genome)
-#ga.setMultiProcessing(False)
-#ga.setGenerations(100)
-#ga.setMutationRate(0.05)
-#ga.setPopulationSize(200)
-#ga.evolve(freq_stats=1)
+def pyevolve():
+    strategy.brain_init()
+    genome = G1DList.G1DList(len(strategy.NET.params))
+    genome.setParams(rangemin=0.0, rangemax=1.0)
+    # Change the initializator to Real values
+    genome.initializator.set(Initializators.G1DListInitializatorReal)
+    # Change the mutator to Gaussian Mutator
+    genome.mutator.set(Mutators.G1DListMutatorRealGaussian)
+    genome.evaluator.set(play_game)
+    ga = GSimpleGA.GSimpleGA(genome)
+    ga.setMultiProcessing(False)
+    ga.setGenerations(MAX_ITER)
+    ga.setMutationRate(0.05)
+    ga.setPopulationSize(200)
+    ga.setMinimax(Consts.minimaxType["minimize"])
+    ga.evolve(freq_stats=1)
+    res = np.asarray(ga.bestIndividual().genomeList)
+    print res
+    if SAVE_RESULTS:
+        dt = str(datetime.datetime.now())
+        name = OUT_FOLDER + "pyevolve_" + dt
+        np.save(name, res[0])
+        np.save("best", res[0])
+
 
 
 #RESULTS#########################################################################
@@ -133,3 +160,25 @@ np.save(name,np.asarray(res[5]))
 #print res
 #np.save(name, res[0])
 #np.save("best", res[0])
+
+##################################################################################
+
+def optimize(optimizer):
+    if optimizer == "scipy_minimize":
+        scipy_minimize()
+    elif optimizer == "pybrain_cma":
+        pybrain_cma()
+    elif optimizer == "cma":
+        cma_lib()
+    elif optimizer == "pyevolve":
+        pyevolve()
+    else:
+        raise ValueError('No such optimizer', optimizer)
+
+#RUN SCRIPT########################################################################
+
+strategy.DIRECTION_STRATEGY = dir_strat
+strategy.NEW_TILE_STRATEGY = til_strat
+strategy.SCORE_FUNCTION = scr_strat
+
+optimize(OPTIMIZER)
