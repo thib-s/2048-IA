@@ -94,7 +94,7 @@ def brain_parametrize():
     global NET
     NET._setParameters(WEIGHTS)
 
-def init_new_brain():
+def reset_brain():
     global NET, WEIGHTS
     setup_brain()
     NET.randomize()
