@@ -25,7 +25,7 @@ import numpy as np
 #CONFIGURATION#############################################################
 
 OPTIMIZER = "pyevolve"
-SAVE_RESULTS = False
+SAVE_RESULTS = True
 dir_strat = 'brain'
 scr_strat = 'ecart'
 til_strat = 'random'
@@ -152,16 +152,7 @@ def pyevolve():
 
 
 
-#RESULTS#########################################################################
-
-#dt = str(datetime.datetime.now())
-#name = OUT_FOLDER+"best_"+dt
-#res = np.asarray(ga.bestIndividual().genomeList)#map(lambda x: x / PRECISION,np.asarray(ga.bestIndividual().genomeList))
-#print res
-#np.save(name, res[0])
-#np.save("best", res[0])
-
-##################################################################################
+#OPTIMIZER SELECTION###############################################################
 
 def optimize(optimizer):
     if optimizer == "scipy_minimize":
