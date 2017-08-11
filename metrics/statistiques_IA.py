@@ -7,8 +7,8 @@ Created on Mon Mar 30 15:57:16 2015
 
 #imports###################################################################
 
-import logic
-import strategy
+from gamelogic import logic
+from gamelogic import strategy
 
 #CONFIGURATION#############################################################
 

@@ -3,28 +3,39 @@ implementation des strategies de jeu pour placer les tuiles et jouer
 """
 # imports ###################################################################
 
-import logic
 import random
-from math import ceil
-import scoring
+
+from gamelogic import logic
+from gamelogic import scoring
+from tools.Config import Config
 
 # configuration ############################################################
+DEFAULTCONFIG = {
+    'tilestrat': 'random',
+    'dirstrat': 'expectimax',
+    'minmaxdepth': 4,
+    'dynamicdepth': True,
+    'alpha': 0.15,
+    'beta': 1000
+}
 
-NEW_TILE_STRATEGY = 'random'
+CONFIG = Config("strategy",DEFAULTCONFIG)
 
-DIRECTION_STRATEGY = 'expectimax'
+NEW_TILE_STRATEGY = CONFIG.getAttr('tilestrat')
+
+DIRECTION_STRATEGY = CONFIG.getAttr('dirstrat')
 
 GAMEOVER = -float('inf')
 
-MINMAX_MAX_LEVEL = 4
+MINMAX_MAX_LEVEL = CONFIG.getAttr('minmaxdepth')
 
 ADAPTED_LEVEL = MINMAX_MAX_LEVEL
 
-ADAPTER = True
+ADAPTER = CONFIG.getAttr('dynamicdepth')
 
-ALPHA = 0.15
+ALPHA = CONFIG.getAttr('alpha')
 
-BETA = 1000
+BETA = CONFIG.getAttr('beta')
 
 #--------------------------------------#
 #---------CHOIX DES STRATEGIES---------#
@@ -107,7 +118,7 @@ def keyboard_choose_direction(key):
 
 def compute_score(board, score):
     global ALPHA, BETA
-    return ALPHA*scoring.empty_tiles(board) + (1-ALPHA)*score + BETA*scoring.best_tile_corner(board)
+    return ALPHA * scoring.empty_tiles(board) + (1 - ALPHA) * score + BETA * scoring.best_tile_corner(board)
 
 #EXPECTIMAX###################################################################
 
@@ -148,9 +159,9 @@ def expectimax_tile(board, level, score = 0):
             logic.computer_move((tile[0], tile[1], tile_value), attempt)
             this_score = expectimax_direction(attempt, level+1, score)
             if tile_value == 2:
-                result += this_score*scoring.empty_tiles(board)*0.9
+                result += this_score * scoring.empty_tiles(board) * 0.9
             else:
-                result += this_score*scoring.empty_tiles(board)*0.1
+                result += this_score * scoring.empty_tiles(board) * 0.1
     if len(logic.empty_tiles(board))==0:
         result = expectimax_direction(board, level+1, score)
     return result

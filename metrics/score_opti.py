@@ -8,13 +8,11 @@ Created on Mon Mar 30 15:57:16 2015
 #imports###################################################################
 
 import cma
-import logic
-import strategy
-#import score_utility
-from scipy.optimize import minimize
+from gamelogic import logic
+# import score_utility
 import numpy as np
 
-
+from gamelogic import strategy
 
 #CONFIGURATION#############################################################
 

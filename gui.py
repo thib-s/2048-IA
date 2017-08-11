@@ -5,11 +5,9 @@
 
 import tkinter
 from collections import defaultdict
-import time
 
-import logic
-import strategy
-
+from gamelogic import logic
+from gamelogic import strategy
 
 # constants #################################################################
 
@@ -57,7 +55,7 @@ score = 0
 scorestr =  tkinter.StringVar()
 scorestr.set("score:"+str(score))
 score_label = tkinter.Label(window, textvariable = scorestr)
-score_label.grid(row=logic.SIZE+1)
+score_label.grid(row=logic.SIZE + 1)
 
 
 def frame(i, j):

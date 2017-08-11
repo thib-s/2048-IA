@@ -5,8 +5,10 @@ Created on Sun Oct  9 11:40:42 2016
 @author: thibaut
 """
 
-import logic
 from math import log
+
+from gamelogic import logic
+
 
 def empty_tiles(board):
     """calcule le ratio de tuiles vides dans le tableau.
