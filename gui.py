@@ -6,13 +6,21 @@
 import tkinter
 from collections import defaultdict
 
+import logging
+
 from gamelogic import logic
 from gamelogic import strategy
+from metrics import game_trace as gt
 
 # constants #################################################################
 
+logging.basicConfig(level=logging.DEBUG)
+
 # time in miliseconds between iterations
 WAIT_DURATION = 6
+GAMETRACE_LOCATION = "gametrace"
+
+GAMETRACE = gt.GameTrace(GAMETRACE_LOCATION)
 
 # colors from http://gabrielecirulli.github.io/2048/style/main.css
 COLORS = defaultdict(
@@ -90,6 +98,7 @@ def update():
 state = 'new_tile'
 resume_state = ''
 board = logic.empty_board()
+gameId = GAMETRACE.generateId()
 
 def key_press(event):
     global state, resume_state, score
@@ -130,14 +139,17 @@ def next_state_loop(key):
 
 # Return True if the game should continue without waiting
 def next_state(key):
-    global state
+    global state, gameId
     if state == 'direction':
         if play_direction(key):
+            GAMETRACE.addMove(gameId, board, score, key)
             state = 'new_tile'
     elif state == 'new_tile':
         if play_new_tile(key):
             state = 'direction'
         if logic.game_over(board):
+            GAMETRACE.saveToDisk()
+            gameId = GAMETRACE.generateId()
             window.configure(bg="#880000")
             state = 'gameover'
     else:
