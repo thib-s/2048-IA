@@ -98,6 +98,7 @@ def update():
 state = 'new_tile'
 resume_state = ''
 board = logic.empty_board()
+boardComputer = logic.empty_board()
 gameId = GAMETRACE.generateId()
 
 def key_press(event):
@@ -121,6 +122,7 @@ def key_press(event):
             resume_state = state
             window.configure(bg="#FFFFFF")
             state = 'pause'
+            GAMETRACE.saveToDisk()
     next_state_loop(event.keysym)
 
 def next_state_loop(key):
@@ -139,13 +141,14 @@ def next_state_loop(key):
 
 # Return True if the game should continue without waiting
 def next_state(key):
-    global state, gameId
+    global state, gameId, boardComputer
     if state == 'direction':
         if play_direction(key):
-            GAMETRACE.addMove(gameId, board, score, key)
+            GAMETRACE.addMove(gameId, logic.copy_board(board), boardComputer, score, strategy.choose_direction(key, boardComputer, score))
             state = 'new_tile'
     elif state == 'new_tile':
         if play_new_tile(key):
+            boardComputer = logic.copy_board(board)
             state = 'direction'
         if logic.game_over(board):
             GAMETRACE.saveToDisk()

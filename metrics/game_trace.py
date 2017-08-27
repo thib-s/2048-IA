@@ -1,6 +1,7 @@
 import logging
 import time
 import tools.PickleIO as pkio
+from gamelogic import logic
 
 
 class GameTrace:
@@ -40,7 +41,9 @@ class GameTrace:
     def setGame(self, gameIndex, moveList):
         self.gameTraceDict[gameIndex] = moveList
 
-    def addMove(self, gameIndex, board, score, direction):
+    def addMove(self, gameIndex, boardBeforeComputer, boardComputer, score, direction):
+        cpboardBeforeComputer = logic.copy_board(boardBeforeComputer)
+        cpboardComputer = logic.copy_board(boardComputer)
         logging.debug("saving " + str(direction) + " to game " + str(gameIndex))
         try:
             game = self.getGame(gameIndex)
@@ -48,7 +51,8 @@ class GameTrace:
             logging.debug("no game with such id found, creating new dict")
             game = list()
         game.append({
-            'board': board,
+            'board': cpboardComputer,
+            'boardBeforeComputer': cpboardBeforeComputer,
             'score': score,
             'direction': direction
         })
